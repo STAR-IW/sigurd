@@ -1,8 +1,23 @@
 import { Module } from '@nestjs/common';
+import { UserModule } from './user/user.module';
+import { WaitlistModule } from './waitlist/waitlist.module';
+import { InstructorModule } from './instructor/instructor.module';
+import { BookingModule } from './booking/booking.module';
+import { ClassModule } from './class/class.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
-  imports: [],
+  imports: [
+    UserModule,
+    WaitlistModule,
+    InstructorModule,
+    BookingModule,
+    ClassModule,
+    PrismaModule,
+    AuthModule,
+  ],
   controllers: [],
   providers: [],
 })
