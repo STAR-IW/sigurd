@@ -6,10 +6,11 @@ import { BookingModule } from './booking/booking.module';
 import { ClassModule } from './class/class.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
-
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({}),
     UserModule,
     WaitlistModule,
     InstructorModule,
