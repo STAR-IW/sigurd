@@ -11,16 +11,17 @@ export class UserController {
   getUser(@GetUser() user: User) {
     return user;
   }
+  // @Get()
+  // findAll() {
+  //   return this.userService.findAll();
+  // }
 
   // @Post()
   // create(@Body() createUserDto: CreateUserDto) {
   //   return this.userService.create(createUserDto);
   // }
   //
-  // @Get()
-  // findAll() {
-  //   return this.userService.findAll();
-  // }
+
   //
   // @Get(':id')
   // findOne(@Param('id') id: string) {

@@ -1,7 +1,8 @@
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { ClassType } from '@prisma/client';
-import { IsEnum, IsNotEmpty } from 'class-validator';
 
-export class CreateClassDto {
+
+export class ClassResponseDto {
   @IsNotEmpty()
   @IsEnum(ClassType, { message: 'Valid Class Type required' })
   classType: ClassType;
@@ -14,5 +15,6 @@ export class CreateClassDto {
   @IsNotEmpty()
   instructorId: number;
   @IsNotEmpty()
-  currentBookings: number;
+  @IsString()
+  instructorName: string;
 }
