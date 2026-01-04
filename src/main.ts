@@ -7,7 +7,7 @@ async function bootstrap() {
   //Ensures that all incoming data is validated against the DTOs.
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Strip properties that don't have decorators
+      whitelist: true, // Strip properties that aren't in dto
       forbidNonWhitelisted: true, // Throw error if extra properties sent
       transform: true, // Automatically transform payloads to DTO instances
     }),

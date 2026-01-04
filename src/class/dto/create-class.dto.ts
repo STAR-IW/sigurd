@@ -13,6 +13,4 @@ export class CreateClassDto {
   capacity: number;
   @IsNotEmpty()
   instructorId: number;
-  @IsNotEmpty()
-  currentBookings: number;
 }
