@@ -7,6 +7,7 @@ import { ClassModule } from './class/class.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
     BookingModule,
     ClassModule,
     AuthModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [],
