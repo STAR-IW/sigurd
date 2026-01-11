@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -13,7 +14,8 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import type { User } from '@prisma/client';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
-import { ResponseBookingDto } from './dto/response-booking.dto';
+import { CancelBookingDto } from './dto/cancel-booking.dto';
+import { FilterBookingDto } from './dto/filter-booking.dto';
 @UseGuards(JwtGuard)
 @Controller('booking')
 export class BookingController {
@@ -29,8 +31,11 @@ export class BookingController {
   //   return this.bookingService.findAll();
   // }
   @Get()
-  findUserBookings(@GetUser() user: User) {
-    return this.bookingService.findUserBookings(user);
+  findUserBookings(
+    @Query() filterBookingDto: FilterBookingDto,
+    @GetUser() user: User,
+  ) {
+    return this.bookingService.findUserBookings(user, filterBookingDto);
   }
 
   // @Patch(':id')
@@ -39,7 +44,11 @@ export class BookingController {
   // }
 
   @Delete(':id')
-  cancelBooking(@Param('id') id: string) {
-    return this.bookingService.cancelBooking(+id);
+  cancelBooking(
+    @GetUser() user: User,
+    @Body()
+    cancelBookingDto: CancelBookingDto,
+  ) {
+    return this.bookingService.cancelBooking(user, cancelBookingDto);
   }
 }

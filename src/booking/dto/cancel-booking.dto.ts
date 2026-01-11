@@ -4,4 +4,7 @@ export class CancelBookingDto {
   @IsNotEmpty()
   @IsNumber()
   bookingId: number;
+  @IsNotEmpty()
+  @IsNumber()
+  classId: number;
 }

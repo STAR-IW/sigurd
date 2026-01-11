@@ -72,7 +72,7 @@ model Booking {
   userId     Int
   status     Status
   bookedAt   DateTime  @default(now())
-  canceledAt DateTime?
+  canceledAt DateTime? @default(now())
   class      Class     @relation(fields: [classId], references: [id])
   classId    Int
 
