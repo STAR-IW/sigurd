@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Param,
   Delete,
   UseGuards,
   Query,
@@ -16,10 +15,14 @@ import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { FilterBookingDto } from './dto/filter-booking.dto';
+import { RedisService } from '../redis/redis.service';
 @UseGuards(JwtGuard)
 @Controller('booking')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(
+    private readonly bookingService: BookingService,
+    private redisService: RedisService,
+  ) {}
 
   @Post()
   create(@GetUser() user: User, @Body() createBookingDto: CreateBookingDto) {
@@ -51,4 +54,17 @@ export class BookingController {
   ) {
     return this.bookingService.cancelBooking(user, cancelBookingDto);
   }
+
+  //FOR TESTING ONLY
+  // @Post('test-publish')
+  // async testPublish() {
+  //   await this.redisService.publish('test-channel', { test: 'data' });
+  //   return { sent: true };
+  // }
+  //
+  // @Post('test-subscribe')
+  // async testSubscribe() {
+  //   await this.redisService.subscribeToChannel('test-channel');
+  //   return { subscribed: true };
+  // }
 }
