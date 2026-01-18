@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableShutdownHooks();
   //Ensures that all incoming data is validated against the DTOs.
   app.useGlobalPipes(
     new ValidationPipe({

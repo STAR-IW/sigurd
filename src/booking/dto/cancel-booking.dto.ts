@@ -7,4 +7,7 @@ export class CancelBookingDto {
   @IsNotEmpty()
   @IsNumber()
   classId: number;
+  @IsNotEmpty()
+  @IsNumber()
+  capacity: number;
 }

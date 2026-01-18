@@ -41,26 +41,40 @@ export class BookingService {
   }
   async cancelBooking(user: User, cancelBookingDto: CancelBookingDto) {
     await this.isCancelBookingOptional(user, cancelBookingDto.classId);
-    return this.prisma.$transaction(async (prisma) => {
-      const newBooking = prisma.booking.update({
-        where: {
-          id: cancelBookingDto.bookingId,
-        },
-        data: {
-          status: 'CANCELLED',
-        },
-      });
-
-      await prisma.class.update({
-        where: { id: cancelBookingDto.classId },
-        data: {
-          currentBookings: {
-            decrement: 1,
+    const resultOfTransaction = await this.prisma.$transaction(
+      async (prisma) => {
+        const updatedBooking = await prisma.booking.update({
+          where: {
+            id: cancelBookingDto.bookingId,
           },
-        },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+
+        const updatedClass = await prisma.class.update({
+          where: { id: cancelBookingDto.classId },
+          data: {
+            currentBookings: {
+              decrement: 1,
+            },
+          },
+        });
+        return { updatedBooking, updatedClass };
+      },
+    );
+    try {
+      await this.redisService.publish('class:updates', {
+        classId: cancelBookingDto.classId,
+        currentBookings: resultOfTransaction.updatedClass.currentBookings,
+        capacity: resultOfTransaction.updatedClass.capacity,
+        timestamp: new Date().toISOString(),
       });
-      return newBooking;
-    });
+    } catch (error) {
+      console.error('Redis publish error:', error);
+    }
+
+    return resultOfTransaction;
   }
   findUserBookings(user: User, filterBookingDto: FilterBookingDto) {
     return this.prisma.booking.findMany({
@@ -138,24 +152,37 @@ export class BookingService {
     if (chosenClass && !(chosenClass.capacity > chosenClass.currentBookings)) {
       throw new ConflictException('Capacity for the selected class is full');
     }
-    return this.prisma.$transaction(async (prisma) => {
-      const newBooking = await prisma.booking.create({
-        data: {
-          classId: chosenClass.id,
-          status: 'BOOKED',
-          userId: user.id,
-        },
-      });
-
-      await prisma.class.update({
-        where: { id: chosenClass.id },
-        data: {
-          currentBookings: {
-            increment: 1,
+    const resultOfTransaction = await this.prisma.$transaction(
+      async (prisma) => {
+        const updatedBooking = await prisma.booking.create({
+          data: {
+            classId: chosenClass.id,
+            status: 'BOOKED',
+            userId: user.id,
           },
-        },
+        });
+
+        const updatedClass = await prisma.class.update({
+          where: { id: chosenClass.id },
+          data: {
+            currentBookings: {
+              increment: 1,
+            },
+          },
+        });
+        return { updatedBooking, updatedClass };
+      },
+    );
+    try {
+      await this.redisService.publish('class:updates', {
+        classId: chosenClass.id,
+        currentBookings: resultOfTransaction.updatedClass.currentBookings,
+        capacity: chosenClass.capacity,
+        timestamp: new Date().toISOString(),
       });
-      return newBooking;
-    });
+    } catch (error) {
+      console.error('Redis publish error:', error);
+    }
+    return resultOfTransaction;
   }
 }
