@@ -10,6 +10,7 @@ import type { Class, User } from '@prisma/client';
 import { RedisService } from '../redis/redis.service';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { FilterBookingDto } from './dto/filter-booking.dto';
+import { ClassCapacity } from '../class/interfaces/class_capacity';
 
 @Injectable()
 export class BookingService {
@@ -64,6 +65,13 @@ export class BookingService {
       },
     );
     try {
+      //redis cache
+      await this.setRedisCache(
+        resultOfTransaction.updatedClass.id,
+        resultOfTransaction.updatedClass.currentBookings,
+        resultOfTransaction.updatedClass.capacity,
+      );
+      //redis pub/sub
       await this.redisService.publish('class:updates', {
         classId: cancelBookingDto.classId,
         currentBookings: resultOfTransaction.updatedClass.currentBookings,
@@ -174,6 +182,13 @@ export class BookingService {
       },
     );
     try {
+      //redis cache
+      await this.setRedisCache(
+        resultOfTransaction.updatedClass.id,
+        resultOfTransaction.updatedClass.currentBookings,
+        resultOfTransaction.updatedClass.capacity,
+      );
+      //redis pub/sub
       await this.redisService.publish('class:updates', {
         classId: chosenClass.id,
         currentBookings: resultOfTransaction.updatedClass.currentBookings,
@@ -184,5 +199,20 @@ export class BookingService {
       console.error('Redis publish error:', error);
     }
     return resultOfTransaction;
+  }
+
+  private async setRedisCache(
+    classId: number,
+    currentBookings: number,
+    capacity: number,
+  ) {
+    const classData: ClassCapacity = {
+      classId: classId,
+      currentBookings: currentBookings,
+      capacity: capacity,
+      availableSpots: capacity - currentBookings,
+    };
+    //redis cache
+    await this.redisService.set(`class:capacity:${classId}`, classData, 60);
   }
 }

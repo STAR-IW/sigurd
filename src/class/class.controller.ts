@@ -33,6 +33,10 @@ export class ClassController {
   findAll(@Query() query: QueryClassDto) {
     return this.classService.findAll(query);
   }
+  @Get(':id/capacity')
+  getClassCapacity(@Param('id') id: string) {
+    return this.classService.getClassCapacity(+id);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

@@ -1,19 +1,27 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Reflector } from '@nestjs/core';
 import { QueryClassDto } from './dto/query-class.dto';
+import { RedisService } from '../redis/redis.service';
+import { ClassCapacity } from './interfaces/class_capacity';
+import { timestamp } from 'rxjs';
 
 @Injectable()
 export class ClassService {
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
+    private redisService: RedisService,
   ) {}
 
   async create(createClassDto: CreateClassDto) {
-    if (createClassDto.startTime < createClassDto.endTime) {
+    if (createClassDto.startTime > createClassDto.endTime) {
       throw new BadRequestException('End time must be after start time');
     }
     const gymClass = await this.prisma.class.create({
@@ -70,5 +78,32 @@ export class ClassService {
         id: id,
       },
     });
+  }
+
+  async getClassCapacity(classId: number) {
+    //check redis cache first
+    const cachedCapacity = await this.redisService.get<ClassCapacity>(
+      `class:capacity:${classId}`,
+    );
+    if (cachedCapacity) {
+      return cachedCapacity;
+    }
+    //if cache not available, query db and cache for 60 sec
+    const classData = await this.prisma.class.findUnique({
+      where: {
+        id: classId,
+      },
+    });
+    if (!classData) {
+      throw new NotFoundException(`Class with ID ${classId} not found`);
+    }
+    const capacity: ClassCapacity = {
+      classId: classData.id,
+      currentBookings: classData.currentBookings,
+      capacity: classData.capacity,
+      availableSpots: classData.capacity - classData.currentBookings,
+    };
+    await this.redisService.set(`class:capacity:${classId}`, capacity, 60);
+    return capacity;
   }
 }
