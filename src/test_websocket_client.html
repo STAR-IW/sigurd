@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<label for="classId">Class Id number:</label>
+
+<input
+  type="number"
+  id="classId"
+  name="classId"
+  required
+  minlength="1"
+  maxlength="8"
+  min="1"
+  size="10" />
+<button onclick="joinClass()" type="button">Join</button>
+<button onclick="leaveClass()" type="button">Leave</button>
+<h2 >Capacity:</h2>
+<div id="successMessage">
+</div>
+<div id="capacityDisplay">
+</div>
+<script
+  src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"
+></script>
+<script>
+  const socket = io("http://localhost:3000/events");
+  socket.on("connect", () => {
+    console.log("connect", socket.connected); // true
+  });
+  socket.on("capacity-updated", (data) => {
+    console.log("capacity-updated", data);
+  });
+
+  function joinClass(){
+    const classId = document.getElementById('classId').value;
+    const successMessage = document.getElementById('successMessage')
+    const capacityDisplay = document.getElementById('capacityDisplay')
+
+//  emit to the endpoint on event.gateway @SubscribeMessage('join-class')
+    socket.emit('join-class', { classId: classId });
+    console.log("HTML | classId: ",{ classId: classId });
+    successMessage.textContent = `Successfully joined class ${classId}`;
+    successMessage.style.background = "lightyellow";
+    capacityDisplay.textContent = `${capacityDisplay.textContent}`;
+  }
+
+  function leaveClass(){
+    const classId = document.getElementById('classId').value;
+    const successMessage = document.getElementById('successMessage')
+
+    socket.emit('leave-class', { classId: classId });
+    console.log("HTML | classId: ",{ classId: classId });
+    successMessage.textContent = `Successfully left class ${classId}`;
+    successMessage.style.background = "LightSalmon";
+  }
+
+</script>
+
+
+</body>
+</html>

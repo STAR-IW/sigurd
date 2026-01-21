@@ -104,9 +104,9 @@ export class BookingService {
   // update(id: number, updateBookingDto: UpdateBookingDto) {
   //   return `This action updates a #${id} booking`;
   // }
-  findAll() {
-    return `This action returns all booking`;
-  }
+  // findAll() {
+  //   return `This action returns all booking`;
+  // }
 
   private async isCancelBookingOptional(user: User, classId: number) {
     const chosenClass = await this.prisma.class.findUnique({

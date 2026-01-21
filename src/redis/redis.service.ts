@@ -72,7 +72,7 @@ export class RedisService implements OnModuleDestroy {
   }
 
   private subscribersListener() {
-    this.logger.log('subscribersListener() started');
+    console.log('subscribersListener() started');
 
     this.redisSubscriber.on('message', (channel, message) => {
       this.logger.log(`Received ${message} from ${channel}`);
