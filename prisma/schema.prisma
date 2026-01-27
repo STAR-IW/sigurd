@@ -62,7 +62,8 @@ model Waitlist {
   joinedAt DateTime
   class    Class    @relation(fields: [classId], references: [id])
   classId  Int
-
+  //user can be only on a waitlist once per class
+  @@unique([userId, classId])
   @@index([classId, position])
 }
 

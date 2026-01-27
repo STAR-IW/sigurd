@@ -11,12 +11,14 @@ import { RedisService } from '../redis/redis.service';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { FilterBookingDto } from './dto/filter-booking.dto';
 import { ClassCapacity } from '../class/interfaces/class_capacity';
+import { WaitlistService } from '../waitlist/waitlist.service';
 
 @Injectable()
 export class BookingService {
   constructor(
     private prisma: PrismaService,
     private readonly redisService: RedisService,
+    private waitlistService: WaitlistService,
   ) {}
 
   async create(user: User, createBookingDto: CreateBookingDto) {
@@ -32,10 +34,20 @@ export class BookingService {
       );
     }
     try {
-      const latestClass = await this.prisma.class.findUniqueOrThrow({
+      const isClassPresent = await this.prisma.class.findUniqueOrThrow({
         where: { id: createBookingDto.classId },
       });
-      return await this.executeBooking(user, latestClass);
+      return await this.executeBooking(user, isClassPresent);
+    } catch (error) {
+      if (
+        error instanceof ConflictException &&
+        error.message.includes('full')
+      ) {
+        return await this.waitlistService.joinWaitList(user, {
+          classId: createBookingDto.classId,
+        });
+      }
+      throw error;
     } finally {
       await this.redisService.unlock(lockKey);
     }

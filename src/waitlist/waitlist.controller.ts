@@ -1,34 +1,51 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { WaitlistService } from './waitlist.service';
-import { CreateWaitlistDto } from './dto/create-waitlist.dto';
-import { UpdateWaitlistDto } from './dto/update-waitlist.dto';
+import { JoinWaitlistDTO } from './dto/join-waitlist-dto';
+import { JwtGuard } from '../auth/guard/jwt.guard';
+import { GetUser } from '../auth/decorator/get-user.decorator';
+import { Role, type User } from '@prisma/client';
+import { RolesGuard } from '../class/guard/roles.guard';
+import { Roles } from '../class/decorator/roles.decorator';
 
+@UseGuards(JwtGuard)
 @Controller('waitlist')
 export class WaitlistController {
   constructor(private readonly waitlistService: WaitlistService) {}
 
   @Post()
-  create(@Body() createWaitlistDto: CreateWaitlistDto) {
-    return this.waitlistService.create(createWaitlistDto);
+  joinWaitList(
+    @GetUser() user: User,
+    @Body() joinWaitListDto: JoinWaitlistDTO,
+  ) {
+    return this.waitlistService.joinWaitList(user, joinWaitListDto);
   }
 
   @Get()
-  findAll() {
-    return this.waitlistService.findAll();
+  getUserWaitlists(@GetUser() user: User) {
+    return this.waitlistService.getUserWaitlists(user);
+  }
+  @UseGuards(RolesGuard)
+  @Roles([Role.ADMIN, Role.INSTRUCTOR])
+  @Get('class/:id')
+  getClassWaitList(@GetUser() user: User, @Param('id') id: string) {
+    return this.waitlistService.getClassWaitList(+id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.waitlistService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWaitlistDto: UpdateWaitlistDto) {
-    return this.waitlistService.update(+id, updateWaitlistDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateWaitlistDto: UpdateWaitlistDto) {
+  //   return this.waitlistService.update(+id, updateWaitlistDto);
+  // }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.waitlistService.remove(+id);
+  leaveWaitList(@GetUser() user: User, @Param('id') id: string) {
+    return this.waitlistService.leaveWaitList(user, +id);
   }
 }

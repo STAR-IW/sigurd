@@ -5,9 +5,7 @@ import { JwtPayload } from '../../auth/interfaces/jwt-payload-interface';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-  ) {}
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     //decorator(roles),current route method

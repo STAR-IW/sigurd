@@ -10,7 +10,7 @@ import { Reflector } from '@nestjs/core';
 import { QueryClassDto } from './dto/query-class.dto';
 import { RedisService } from '../redis/redis.service';
 import { ClassCapacity } from './interfaces/class_capacity';
-import { timestamp } from 'rxjs';
+
 
 @Injectable()
 export class ClassService {
