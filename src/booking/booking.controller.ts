@@ -15,14 +15,10 @@ import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { FilterBookingDto } from './dto/filter-booking.dto';
-import { RedisService } from '../redis/redis.service';
 @UseGuards(JwtGuard)
 @Controller('booking')
 export class BookingController {
-  constructor(
-    private readonly bookingService: BookingService,
-    private redisService: RedisService,
-  ) {}
+  constructor(private readonly bookingService: BookingService) {}
 
   @Post()
   create(@GetUser() user: User, @Body() createBookingDto: CreateBookingDto) {

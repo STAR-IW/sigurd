@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,6 +24,18 @@ export class WaitlistService {
       const classToJoin = await this.prismaService.class.findUniqueOrThrow({
         where: { id: joinWaitListDto.classId },
       });
+      const existingBooking = await this.prismaService.booking.findFirst({
+        where: {
+          userId: user.id,
+          classId: joinWaitListDto.classId,
+          status: 'BOOKED',
+        },
+      });
+      if (existingBooking)
+        throw new ConflictException(
+          'Can not join waitlist - Class Already booked for that user',
+        );
+
       if (classToJoin.currentBookings < classToJoin.capacity) {
         throw new BadRequestException(
           'Class still has available spots. Please book instead.',

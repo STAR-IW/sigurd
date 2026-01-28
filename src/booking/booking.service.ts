@@ -12,6 +12,7 @@ import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { FilterBookingDto } from './dto/filter-booking.dto';
 import { ClassCapacity } from '../class/interfaces/class_capacity';
 import { WaitlistService } from '../waitlist/waitlist.service';
+import { ClassFullException } from './exceptions/class-full.exception';
 
 @Injectable()
 export class BookingService {
@@ -39,10 +40,7 @@ export class BookingService {
       });
       return await this.executeBooking(user, isClassPresent);
     } catch (error) {
-      if (
-        error instanceof ConflictException &&
-        error.message.includes('full')
-      ) {
+      if (error instanceof ClassFullException) {
         return await this.waitlistService.joinWaitList(user, {
           classId: createBookingDto.classId,
         });
@@ -170,7 +168,7 @@ export class BookingService {
   }
   private async executeBooking(user: User, chosenClass: Class) {
     if (chosenClass && !(chosenClass.capacity > chosenClass.currentBookings)) {
-      throw new ConflictException('Capacity for the selected class is full');
+      throw new ClassFullException(chosenClass.id);
     }
     const resultOfTransaction = await this.prisma.$transaction(
       async (prisma) => {
