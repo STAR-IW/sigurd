@@ -11,7 +11,6 @@ import { QueryClassDto } from './dto/query-class.dto';
 import { RedisService } from '../redis/redis.service';
 import { ClassCapacity } from './interfaces/class_capacity';
 
-
 @Injectable()
 export class ClassService {
   constructor(

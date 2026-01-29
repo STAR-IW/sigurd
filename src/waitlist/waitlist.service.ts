@@ -10,6 +10,7 @@ import { RedisService } from '../redis/redis.service';
 import { User } from '@prisma/client';
 import { WaitListResponseDto } from './dto/waitlist-response.dto';
 
+
 @Injectable()
 export class WaitlistService {
   constructor(
@@ -92,6 +93,48 @@ export class WaitlistService {
     }
   }
 
+  async promoteFromWaitlistToBooked(classId: number) {
+    const lockKey = `waitlist:promote:${classId}`;
+    await this.redisService.lock(lockKey, 5);
+    try {
+      const firstInWaitlist = await this.prismaService.waitlist.findFirst({
+        where: { classId: classId },
+      });
+      if (!firstInWaitlist) return null;
+
+      const resultOfPromotion = await this.prismaService.$transaction(
+        async (prisma) => {
+          //create booking for the promoted user from waitlist
+          await prisma.booking.create({
+            data: {
+              classId: classId,
+              status: 'BOOKED',
+              userId: firstInWaitlist.userId,
+            },
+          });
+          //delete waitlist entry
+          await prisma.waitlist.delete({
+            where: { id: firstInWaitlist.id },
+          });
+          //update remaining positons in waitlist
+          await prisma.waitlist.updateMany({
+            where: { classId: classId, position: { gt: 1 } }, //greater than deleted position in waitlist
+            data: { position: { decrement: 1 } }, //shift everyone in waitlist down - means move up in line
+          });
+          //update current booking in the relevant class
+          await prisma.class.update({
+            where: { id: classId },
+            data: { currentBookings: { increment: 1 } },
+          });
+        },
+      );
+
+      return firstInWaitlist;
+    } finally {
+      await this.redisService.unlock(lockKey);
+    }
+  }
+
   getUserWaitlists(user: User) {
     return `This action returns all waitlist`;
   }
@@ -104,7 +147,7 @@ export class WaitlistService {
   //   return `This action updates a #${id} waitlist`;
   // }
 
-  leaveWaitList(user: User, waitListId : number) {
+  leaveWaitList(user: User, waitListId: number) {
     return `This action removes a `;
   }
 }

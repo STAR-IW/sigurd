@@ -74,6 +74,22 @@ export class BookingService {
         return { updatedBooking, updatedClass };
       },
     );
+    if (resultOfTransaction) {
+      const promotedUser =
+        await this.waitlistService.promoteFromWaitlistToBooked(
+          cancelBookingDto.classId,
+        );
+      //add if promoted, publish capacity update + promotion event
+      if (promotedUser) {
+        await this.redisService.publish('class:promotions', {
+          user: {
+            userId: promotedUser.userId,
+            classId: promotedUser.classId,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      }
+    }
     try {
       //redis cache
       await this.setRedisCache(
