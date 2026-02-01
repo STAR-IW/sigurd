@@ -1,7 +1,8 @@
 import { IsNumber } from 'class-validator';
-import { ClassType } from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ResponseBookingDto {
   @IsNumber()
+  @ApiProperty()
   bookingId: number;
 }

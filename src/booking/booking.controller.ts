@@ -15,11 +15,13 @@ import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { FilterBookingDto } from './dto/filter-booking.dto';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+@ApiBearerAuth()
 @UseGuards(JwtGuard)
 @Controller('booking')
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
-
+  @ApiOperation({ summary: 'Book a gym class' })
   @Post()
   create(@GetUser() user: User, @Body() createBookingDto: CreateBookingDto) {
     return this.bookingService.create(user, createBookingDto);
@@ -29,6 +31,7 @@ export class BookingController {
   // findAll() {
   //   return this.bookingService.findAll();
   // }
+  @ApiOperation({ summary: 'Get the specified user bookings' })
   @Get()
   findUserBookings(
     @Query() filterBookingDto: FilterBookingDto,
@@ -41,7 +44,7 @@ export class BookingController {
   // update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
   //   return this.bookingService.update(+id, updateBookingDto);
   // }
-
+  @ApiOperation({ summary: 'Delete specified booking' })
   @Delete(':id')
   cancelBooking(
     @GetUser() user: User,
