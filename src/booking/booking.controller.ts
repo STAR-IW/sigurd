@@ -7,7 +7,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import BookingService from './booking.service';
+import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
 import type { User } from '@prisma/client';

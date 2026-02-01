@@ -10,7 +10,6 @@ import { RedisService } from '../redis/redis.service';
 import { User } from '@prisma/client';
 import { WaitListResponseDto } from './dto/waitlist-response.dto';
 
-
 @Injectable()
 export class WaitlistService {
   constructor(
@@ -136,18 +135,58 @@ export class WaitlistService {
   }
 
   getUserWaitlists(user: User) {
-    return `This action returns all waitlist`;
+    return this.prismaService.waitlist.findMany({
+      where: { userId: user.id },
+      select: {
+        position: true,
+        joinedAt: true,
+        id: true,
+        class: { select: { id: true, instructor: true, classType: true } },
+      },
+      orderBy: { joinedAt: 'desc' },
+    });
   }
 
   getClassWaitList(classId: number) {
-    return `This action returns a `;
+    return this.prismaService.waitlist.findMany({
+      where: { classId: classId },
+      select: {
+        user: true,
+        position: true,
+      },
+      orderBy: { position: 'asc' },
+    });
   }
 
   // update(id: number, updateWaitlistDto: UpdateWaitlistDto) {
   //   return `This action updates a #${id} waitlist`;
   // }
 
-  leaveWaitList(user: User, waitListId: number) {
-    return `This action removes a `;
+  async leaveWaitList(user: User, waitListId: number) {
+    const findUserInWaitlist = await this.prismaService.waitlist.findUnique({
+      where: {
+        id: waitListId,
+        userId: user.id,
+      },
+    });
+    if (findUserInWaitlist) {
+      await this.prismaService.$transaction(async (prisma) => {
+        await prisma.waitlist.delete({
+          where: { id: waitListId },
+        });
+        //update remaining positons in waitlist
+        await prisma.waitlist.updateMany({
+          where: {
+            classId: findUserInWaitlist.classId,
+            position: { gt: findUserInWaitlist.position },
+          }, //greater than deleted position in waitlist
+          data: { position: { decrement: 1 } }, //shift everyone in waitlist down - means move up in line
+        });
+      });
+      return `Successfully left waitlist`;
+    }
+    if (!findUserInWaitlist) {
+      throw new NotFoundException('Waitlist not found');
+    }
   }
 }

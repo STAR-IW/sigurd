@@ -74,22 +74,12 @@ export class BookingService {
         return { updatedBooking, updatedClass };
       },
     );
-    if (resultOfTransaction) {
+
       const promotedUser =
         await this.waitlistService.promoteFromWaitlistToBooked(
           cancelBookingDto.classId,
         );
-      //add if promoted, publish capacity update + promotion event
-      if (promotedUser) {
-        await this.redisService.publish('class:promotions', {
-          user: {
-            userId: promotedUser.userId,
-            classId: promotedUser.classId,
-            timestamp: new Date().toISOString(),
-          },
-        });
-      }
-    }
+
     try {
       //redis cache
       await this.setRedisCache(
@@ -102,6 +92,7 @@ export class BookingService {
         classId: cancelBookingDto.classId,
         currentBookings: resultOfTransaction.updatedClass.currentBookings,
         capacity: resultOfTransaction.updatedClass.capacity,
+        promotedUserId: promotedUser?.userId, //can be undefined if not promoted from waitlist
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
