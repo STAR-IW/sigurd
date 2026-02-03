@@ -1,12 +1,18 @@
 import { PrismaClient, Role, Specialty, ClassType } from '../generated/prisma';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Start seeding...');
+  const configService = new ConfigService();
 
-  const hashedPassword = await bcrypt.hash('${PASSWORD_HASH}', 10);
+  const password:string | undefined = configService.get('SEED_ADMIN_PASSWORD');
+  if (!password) {
+    throw new Error('SEED_ADMIN_PASSWORD is required in .env file');
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // ========== ADMINS ==========
   console.log('Creating admins...');
