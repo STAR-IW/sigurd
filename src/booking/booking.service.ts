@@ -13,6 +13,7 @@ import { FilterBookingDto } from './dto/filter-booking.dto';
 import { ClassCapacity } from '../class/interfaces/class_capacity';
 import { WaitlistService } from '../waitlist/waitlist.service';
 import { ClassFullException } from './exceptions/class-full.exception';
+import { QueryAllBookingsDto } from './dto/query-all-bookings.dto';
 
 @Injectable()
 export class BookingService {
@@ -75,10 +76,9 @@ export class BookingService {
       },
     );
 
-      const promotedUser =
-        await this.waitlistService.promoteFromWaitlistToBooked(
-          cancelBookingDto.classId,
-        );
+    const promotedUser = await this.waitlistService.promoteFromWaitlistToBooked(
+      cancelBookingDto.classId,
+    );
 
     try {
       //redis cache
@@ -231,5 +231,22 @@ export class BookingService {
     };
     //redis cache
     await this.redisService.set(`class:capacity:${classId}`, classData, 60);
+  }
+
+  getAllBookings(queryAllBookingsDto: QueryAllBookingsDto) {
+    return this.prisma.booking.findMany({
+      where: {
+        status: queryAllBookingsDto.status,
+        classId: queryAllBookingsDto.classId,
+        class: {
+          startTime: queryAllBookingsDto.startTime,
+          endTime: queryAllBookingsDto.endTime,
+        },
+      },
+      include: {
+        class: { include: { instructor: true } },
+      },
+      orderBy: [{ bookedAt: 'desc' }],
+    });
   }
 }

@@ -10,12 +10,16 @@ import {
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
+import { Role } from '@prisma/client';
 import type { User } from '@prisma/client';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { FilterBookingDto } from './dto/filter-booking.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { QueryAllBookingsDto } from './dto/query-all-bookings.dto';
+import { RolesGuard } from '../class/guard/roles.guard';
+import { Roles } from '../class/decorator/roles.decorator';
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
 @Controller('booking')
@@ -39,11 +43,14 @@ export class BookingController {
   ) {
     return this.bookingService.findUserBookings(user, filterBookingDto);
   }
+  @ApiOperation({ summary: 'Get all bookings ( Admin role only )' })
+  @UseGuards(RolesGuard)
+  @Roles([Role.ADMIN])
+  @Get('all')
+  getAllBookings(@Query() queryAllBookingsDto: QueryAllBookingsDto) {
+    return this.bookingService.getAllBookings(queryAllBookingsDto);
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
-  //   return this.bookingService.update(+id, updateBookingDto);
-  // }
   @ApiOperation({ summary: 'Delete specified booking' })
   @Delete(':id')
   cancelBooking(

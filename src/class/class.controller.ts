@@ -18,6 +18,7 @@ import { Role } from '@prisma/client';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { QueryClassDto } from './dto/query-class.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { QueryInstructorScheduleDto } from './dto/query-instructor-schedule.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
@@ -41,6 +42,20 @@ export class ClassController {
   getClassCapacity(@Param('id') id: string) {
     return this.classService.getClassCapacity(+id);
   }
+  @ApiOperation({ summary: 'Get specific instructor schedule' })
+  @UseGuards(RolesGuard)
+  @Roles([Role.ADMIN, Role.INSTRUCTOR])
+  @Get('instructor/:id/schedule')
+  getInstructorClassSchedule(
+    @Param('id') id: string,
+    @Query() queryInstructorScheduleDto: QueryInstructorScheduleDto,
+  ) {
+    return this.classService.getInstructorClassSchedule(
+      +id,
+      queryInstructorScheduleDto,
+    );
+  }
+
   @ApiOperation({ summary: 'Get info of specific gym class by id' })
   @Get(':id')
   findOne(@Param('id') id: string) {

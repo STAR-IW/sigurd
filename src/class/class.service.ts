@@ -10,6 +10,7 @@ import { Reflector } from '@nestjs/core';
 import { QueryClassDto } from './dto/query-class.dto';
 import { RedisService } from '../redis/redis.service';
 import { ClassCapacity } from './interfaces/class_capacity';
+import { QueryInstructorScheduleDto } from './dto/query-instructor-schedule.dto';
 
 @Injectable()
 export class ClassService {
@@ -104,5 +105,23 @@ export class ClassService {
     };
     await this.redisService.set(`class:capacity:${classId}`, capacity, 60);
     return capacity;
+  }
+
+  async getInstructorClassSchedule(
+    id: number,
+    queryInstructorScheduleDto: QueryInstructorScheduleDto,
+  ) {
+    {
+      return this.prisma.class.findMany({
+        where: {
+          instructorId: id,
+          startTime: {
+            gte: queryInstructorScheduleDto.startTime,
+            lte: queryInstructorScheduleDto.endTime,
+          },
+        },
+        orderBy: [{ startTime: 'asc' }],
+      });
+    }
   }
 }

@@ -1,7 +1,6 @@
 import { IsEnum, IsOptional } from 'class-validator';
 import { ClassType } from '@prisma/client';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class QueryClassDto {
   @IsOptional()
