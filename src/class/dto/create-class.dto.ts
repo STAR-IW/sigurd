@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateClassDto {
   @IsNotEmpty()
   @IsEnum(ClassType, { message: 'Valid Class Type required' })
-  @ApiProperty()
+  @ApiProperty({ example: 'WEIGHT_LIFTING' })
   classType: ClassType;
   @IsNotEmpty()
   @ApiProperty()

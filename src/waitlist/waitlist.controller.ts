@@ -20,7 +20,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { WaitListResponseDto } from './dto/waitlist-response.dto';
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtGuard)
 @Controller('waitlist')
 export class WaitlistController {

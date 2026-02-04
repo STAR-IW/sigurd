@@ -20,7 +20,7 @@ import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { QueryAllBookingsDto } from './dto/query-all-bookings.dto';
 import { RolesGuard } from '../class/guard/roles.guard';
 import { Roles } from '../class/decorator/roles.decorator';
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtGuard)
 @Controller('booking')
 export class BookingController {

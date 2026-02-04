@@ -8,7 +8,7 @@ async function main() {
   console.log('Start seeding...');
   const configService = new ConfigService();
 
-  const password:string | undefined = configService.get('SEED_ADMIN_PASSWORD');
+  const password: string | undefined = configService.get('SEED_ADMIN_PASSWORD');
   if (!password) {
     throw new Error('SEED_ADMIN_PASSWORD is required in .env file');
   }

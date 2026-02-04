@@ -20,7 +20,17 @@ async function bootstrap() {
     .setTitle('Booking real-time app API')
     .setDescription('Class Booking System with Real-time Availability')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

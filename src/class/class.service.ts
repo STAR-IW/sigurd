@@ -24,17 +24,24 @@ export class ClassService {
     if (createClassDto.startTime > createClassDto.endTime) {
       throw new BadRequestException('End time must be after start time');
     }
-    const gymClass = await this.prisma.class.create({
-      data: {
-        classType: createClassDto.classType,
-        startTime: createClassDto.startTime,
-        endTime: createClassDto.endTime,
-        capacity: createClassDto.capacity,
-        instructorId: createClassDto.instructorId,
-        currentBookings: 0, // system auto calculated during booking
-      },
-    });
-    return gymClass;
+    try {
+      const gymClass = await this.prisma.class.create({
+        data: {
+          classType: createClassDto.classType,
+          startTime: createClassDto.startTime,
+          endTime: createClassDto.endTime,
+          capacity: createClassDto.capacity,
+          instructorId: createClassDto.instructorId,
+          currentBookings: 0, // system auto calculated during booking
+        },
+      });
+      return gymClass;
+    } catch (error) {
+      if (error.code === 'P2003') {
+        throw new BadRequestException('Instructor not found');
+      }
+      throw error;
+    }
   }
 
   findAll(queryClassDto: QueryClassDto) {

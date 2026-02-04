@@ -6,19 +6,19 @@ export class AuthDto {
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  @ApiProperty()
+  @ApiProperty({ example: 'marty@delorian.com' })
   email: string;
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ example: '12345' })
   password: string;
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ example: 'Marty McFly' })
   name: string;
   @IsEnum(Role, { message: 'Valid role required' })
-  @ApiProperty()
+  @ApiProperty({ example: 'ADMIN' })
   role: Role;
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ example: '055511111' })
   phone: string;
 }

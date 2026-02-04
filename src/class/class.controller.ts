@@ -20,7 +20,7 @@ import { QueryClassDto } from './dto/query-class.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { QueryInstructorScheduleDto } from './dto/query-instructor-schedule.dto';
 
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtGuard)
 @Controller('classes')
 export class ClassController {
