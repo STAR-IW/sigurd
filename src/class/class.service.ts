@@ -38,7 +38,7 @@ export class ClassService {
       return gymClass;
     } catch (error) {
       if (error.code === 'P2003') {
-        throw new BadRequestException('Instructor not found');
+        throw new BadRequestException('Invalid instructor ID');
       }
       throw error;
     }

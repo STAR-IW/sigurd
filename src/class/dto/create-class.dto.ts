@@ -8,15 +8,15 @@ export class CreateClassDto {
   @ApiProperty({ example: 'WEIGHT_LIFTING' })
   classType: ClassType;
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ example: '2050-02-04T18:10:13.460Z' })
   startTime: Date;
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ example: '2055-02-04T18:10:13.460Z' })
   endTime: Date;
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ example: 10 })
   capacity: number;
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   instructorId: number;
 }
