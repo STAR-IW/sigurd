@@ -8,6 +8,7 @@ import {
   Patch,
   Delete,
   Query,
+  UseFilters,
 } from '@nestjs/common';
 import { ClassService } from './class.service';
 import { JwtGuard } from '../auth/guard/jwt.guard';
@@ -19,6 +20,7 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { QueryClassDto } from './dto/query-class.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { QueryInstructorScheduleDto } from './dto/query-instructor-schedule.dto';
+import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtGuard)
@@ -32,6 +34,14 @@ export class ClassController {
   create(@Body() createClassDto: CreateClassDto) {
     return this.classService.create(createClassDto);
   }
+  // FOR TESTING ONLY
+  @ApiOperation({ summary: 'FOR TESTING' })
+  @UseGuards(RolesGuard)
+  @Get('testing')
+  temp() {
+    throw new Error();
+  }
+  //-------------
   @ApiOperation({ summary: 'Get multiple gym class information' })
   @Get()
   findAll(@Query() query: QueryClassDto) {
