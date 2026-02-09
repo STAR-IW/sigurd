@@ -5,11 +5,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuthDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { LoginDto } from './dto/login.dto';
+import { SignupDto } from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,16 +20,16 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async register(authDto: AuthDto) {
+  async register(signupDto: SignupDto) {
     try {
-      const hash = await bcrypt.hash(authDto.password, 12);
-      authDto.password = hash;
+      const hash = await bcrypt.hash(signupDto.password, 12);
+      signupDto.password = hash;
       const user = await this.prisma.user.create({
         data: {
-          email: authDto.email,
-          password: authDto.password,
-          role: authDto.role,
-          phone: authDto.phone,
+          email: signupDto.email,
+          password: signupDto.password,
+          role: signupDto.role,
+          phone: signupDto.phone,
         },
       });
       return this.signToken(user.id, user.email);
@@ -41,16 +42,19 @@ export class AuthService {
       throw err;
     }
   }
-  async login(authDto: AuthDto) {
+  async login(loginDto: LoginDto) {
     const user = await this.prisma.user.findUnique({
-      where: { email: authDto.email },
+      where: { email: loginDto.email },
     });
 
     if (!user) {
       throw new UnauthorizedException('Credentials incorrect');
     }
 
-    const passwordMatch = await bcrypt.compare(authDto.password, user.password);
+    const passwordMatch = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
 
     if (!passwordMatch) {
       throw new UnauthorizedException('Credentials incorrect');
