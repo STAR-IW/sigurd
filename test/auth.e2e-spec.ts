@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { faker } from '@faker-js/faker/locale/en';
 
 describe('Authentication (e2e)', () => {
   let app: INestApplication;
@@ -24,18 +25,19 @@ describe('Authentication (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
+    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 
   describe('POST /auth/register', () => {
-    it('should register a new user - should return access toke', () => {
+    it('should register a new user - should return access token', () => {
       return request(app.getHttpServer())
         .post('/auth/register')
         .send({
-          email: `test${Date.now()}@example.com`,
-          password: 'password123',
-          name: 'Test User',
+          email: faker.internet.email(),
+          password: faker.internet.password(),
+          name: faker.person.firstName(),
           role: 'ADMIN',
-          phone: '456465456',
+          phone: faker.phone.number(),
         })
         .expect((res) => {
           console.log('Response:', res.body);
@@ -46,40 +48,72 @@ describe('Authentication (e2e)', () => {
         });
     });
 
-    // it('should fail with duplicate email', async () => {
-    //   const email = `duplicate${Date.now()}@example.com`;
-    //
-    //   await request(app.getHttpServer())
-    //     .post('/auth/register')
-    //     .send({ email, password: 'password123', name: 'User1' });
-    //
-    //   return request(app.getHttpServer())
-    //     .post('/auth/register')
-    //     .send({ email, password: 'password123', name: 'User2' })
-    //     .expect(409);
-    // });
+    it('should fail with duplicate email', async () => {
+      const duplicatedEmail = faker.internet.email();
+
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: duplicatedEmail,
+        password: faker.internet.password(),
+        name: faker.person.firstName(),
+        role: 'ADMIN',
+        phone: faker.phone.number(),
+      });
+
+      return request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: duplicatedEmail,
+          password: faker.internet.password(),
+          name: faker.person.firstName(),
+          role: 'ADMIN',
+          phone: faker.phone.number(),
+        })
+        .expect((res: any) => {
+          expect(res.body).toHaveProperty('message');
+          expect(res.body.message).toMatch('Credentials already exists');
+        });
+    });
   });
-  //
-  // describe('POST /auth/login', () => {
-  //   it('should login with valid credentials', async () => {
-  //     const email = `login${Date.now()}@example.com`;
-  //
-  //     // Register first
-  //     await request(app.getHttpServer())
-  //       .post('/auth/register')
-  //       .send({ email, password: 'password123', name: 'Login User' });
-  //
-  //     // Then login
-  //     return request(app.getHttpServer())
-  //       .post('/auth/login')
-  //       .send({ email, password: 'password123' })
-  //       .expect(200)
-  //       .expect((res) => {
-  //         expect(res.body).toHaveProperty('access_token');
-  //         authToken = res.body.access_token;
-  //       });
-  //   });
-  //
+
+  describe('POST /auth/login', () => {
+    it('should login with valid credentials', async () => {
+      const testUser = {
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        name: faker.person.firstName(),
+        role: 'ADMIN',
+        phone: faker.phone.number(),
+      };
+
+      // Register first
+      await request(app.getHttpServer()).post('/auth/register').send(testUser);
+
+      // Then login - send ALL fields
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send(testUser) // Send the full object, not just email/password
+        .expect(201)
+        .expect((res: any) => {
+          expect(res.body).toHaveProperty('access_token');
+          authToken = res.body.access_token;
+        });
+    });
+
+    it('should fail with invalid credentials', () => {
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: faker.internet.email(),
+          password: 'wrongpassword',
+
+        })
+        .expect(401)
+        .expect((res: any) => {
+          expect(res.body).toHaveProperty('message');
+        });
+    });
+  });
+
   //   it('should fail with invalid credentials', () => {
   //     return request(app.getHttpServer())
   //       .post('/auth/login')
