@@ -25,7 +25,6 @@ describe('Authentication (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
-    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 
   describe('POST /auth/register', () => {
@@ -38,9 +37,6 @@ describe('Authentication (e2e)', () => {
           name: faker.person.firstName(),
           role: 'ADMIN',
           phone: faker.phone.number(),
-        })
-        .expect((res) => {
-          console.log('Response:', res.body);
         })
         .expect(201)
         .expect((res) => {
@@ -91,7 +87,7 @@ describe('Authentication (e2e)', () => {
       // Then login - send ALL fields
       return request(app.getHttpServer())
         .post('/auth/login')
-        .send(testUser) // Send the full object, not just email/password
+        .send(testUser)
         .expect(201)
         .expect((res: any) => {
           expect(res.body).toHaveProperty('access_token');
@@ -105,7 +101,6 @@ describe('Authentication (e2e)', () => {
         .send({
           email: faker.internet.email(),
           password: 'wrongpassword',
-
         })
         .expect(401)
         .expect((res: any) => {
@@ -114,36 +109,4 @@ describe('Authentication (e2e)', () => {
     });
   });
 
-  //   it('should fail with invalid credentials', () => {
-  //     return request(app.getHttpServer())
-  //       .post('/auth/login')
-  //       .send({ email: 'wrong@example.com', password: 'wrongpass' })
-  //       .expect(401);
-  //   });
-  // });
-  //
-  // describe('GET /users/me', () => {
-  //   it('should fail without token', () => {
-  //     return request(app.getHttpServer()).get('/users/me').expect(401);
-  //   });
-  //
-  //   it('should return user with valid token', async () => {
-  //     const email = `profile${Date.now()}@example.com`;
-  //
-  //     // Register and get token
-  //     const registerRes = await request(app.getHttpServer())
-  //       .post('/auth/register')
-  //       .send({ email, password: 'password123', name: 'Profile User' });
-  //
-  //     const token = registerRes.body.access_token;
-  //
-  //     return request(app.getHttpServer())
-  //       .get('/users/me')
-  //       .set('Authorization', `Bearer ${token}`)
-  //       .expect(200)
-  //       .expect((res) => {
-  //         expect(res.body).toHaveProperty('email', email);
-  //       });
-  //   });
-  // });
 });

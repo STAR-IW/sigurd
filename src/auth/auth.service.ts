@@ -26,6 +26,7 @@ export class AuthService {
       signupDto.password = hash;
       const user = await this.prisma.user.create({
         data: {
+          name: signupDto.name,
           email: signupDto.email,
           password: signupDto.password,
           role: signupDto.role,
