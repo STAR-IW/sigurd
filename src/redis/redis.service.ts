@@ -8,16 +8,25 @@ export class RedisService implements OnModuleDestroy {
   private redisSubscriber: RedisType; // subscribe
   private readonly logger = new Logger(RedisService.name);
   constructor(private configService: ConfigService) {
-    this.client = new Redis({
-      host: this.configService.get<string>('REDIS_HOST'),
-      port: 6379,
-      password: this.configService.get<string>('REDIS_PASSWORD'),
-    });
-    this.redisSubscriber = new Redis({
-      host: this.configService.get<string>('REDIS_HOST'),
-      port: 6379,
-      password: this.configService.get<string>('REDIS_PASSWORD'),
-    });
+    // For Render(production), use full Redis URL
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+    if (redisUrl) {
+      // Production: use Redis URL
+      this.client = new Redis(redisUrl);
+      this.redisSubscriber = new Redis(redisUrl);
+    } else {
+      // Local dev: use host/password
+      this.client = new Redis({
+        host: this.configService.get<string>('REDIS_HOST'),
+        port: 6379,
+        password: this.configService.get<string>('REDIS_PASSWORD'),
+      });
+      this.redisSubscriber = new Redis({
+        host: this.configService.get<string>('REDIS_HOST'),
+        port: 6379,
+        password: this.configService.get<string>('REDIS_PASSWORD'),
+      });
+    }
 
     this.client.on('error', (err) => {
       this.logger.error('Client error:', err);
