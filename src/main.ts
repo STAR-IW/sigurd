@@ -3,9 +3,18 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  //security-related HTTP headers
+  app.use(helmet());
+
+  // CORS - allow frontend access
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true,
+  });
   app.enableShutdownHooks();
   //Ensures that all incoming data is validated against the DTOs.
   app.useGlobalPipes(
