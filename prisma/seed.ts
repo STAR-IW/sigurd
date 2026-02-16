@@ -1,4 +1,4 @@
-import { PrismaClient, Role, Specialty, ClassType } from '../generated/prisma';
+import { PrismaClient, Role, Specialty, ClassType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 
