@@ -20,7 +20,6 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { QueryClassDto } from './dto/query-class.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { QueryInstructorScheduleDto } from './dto/query-instructor-schedule.dto';
-import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtGuard)
