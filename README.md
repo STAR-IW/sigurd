@@ -215,8 +215,31 @@ Class capacity cached for 60 seconds to reduce database load on high-traffic end
 
 ## Deployment
 
-*Coming soon*
 
+**Live Demo:** [https://sigurd.onrender.com/api](https://sigurd.onrender.com/api)
+
+### Render Deployment (Free)
+
+**Requirements:**
+- GitHub repository
+- Render account 
+
+**Steps:**
+1. **Create Services:**
+    - PostgreSQL database (free tier)
+    - Redis instance (free tier)
+    - Web Service connected to GitHub
+
+2. **Environment Variables:**
+    - `DATABASE_URL` - From Render PostgreSQL
+    - `REDIS_URL` - From Render Redis
+    - `JWT_SECRET` - Generate secure key
+
+3. **Build Settings:**
+    - Build Command: `npm install && npm run build:render`
+    - Start Command: `node dist/src/main.js`
+
+4. **Auto-deploy enabled** - pushes to `main` trigger deployment
 
 
 ## License
