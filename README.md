@@ -36,6 +36,7 @@ Real-time class booking platform with automatic waitlist management, live capaci
 - Git
 
 ## Architecture
+![Architecture](./docs/architecture.svg)
 ```
 Client → NestJS API (JWT Auth, REST endpoints)
     ├── PostgreSQL (data persistence)

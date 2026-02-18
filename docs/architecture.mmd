@@ -1,0 +1,29 @@
+
+graph TD
+    Client[Client Applications<br/>Web/Mobile/Postman] -->|HTTP/HTTPS| API[NestJS REST API<br/>Port 3000]
+    Client -->|WebSocket| WS[WebSocket Gateway<br/>Socket.io]
+
+    API --> Auth[JWT Authentication<br/>Guards & Roles]
+    API --> Controllers[Controllers Layer<br/>Auth, Classes, Booking,<br/>Waitlist, Instructor]
+
+    Controllers --> Services[Business Logic Layer<br/>Services & DTOs]
+    Services --> Cache{Redis Cache<br/>Port 6379}
+    Services --> PubSub[Redis Pub/Sub<br/>Real-time Events]
+    Services --> Lock[Redis Distributed<br/>Locks]
+    Services --> DB[(PostgreSQL<br/>Port 5432)]
+
+    WS --> EventsGateway[Events Gateway<br/>Room Management]
+    EventsGateway --> PubSub
+    PubSub --> EventsGateway
+    EventsGateway -->|Broadcast| Client
+
+    DB --> Prisma[Prisma ORM<br/>Query Builder]
+
+    subgraph "Production Environment"
+        Render[Render.com<br/>- Auto Deploy<br/>- SSL/HTTPS<br/>- Environment Variables]
+    end
+
+    subgraph "Development Environment"
+        Docker[Docker Compose<br/>- PostgreSQL Container<br/>- Redis Container<br/>- pgAdmin<br/>- RedisInsight]
+    end
+```
