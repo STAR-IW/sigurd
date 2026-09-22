@@ -94,7 +94,12 @@ export class WaitlistService {
 
   async promoteFromWaitlistToBooked(classId: number) {
     const lockKey = `waitlist:promote:${classId}`;
-    await this.redisService.lock(lockKey, 5);
+    const locked = await this.redisService.lock(lockKey, 5);
+    if (!locked) {
+      throw new ConflictException(
+        'Waitlist promotion is already in progress for this class',
+      );
+    }
     try {
       const firstInWaitlist = await this.prismaService.waitlist.findFirst({
         where: { classId: classId },
